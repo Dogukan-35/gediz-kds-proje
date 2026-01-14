@@ -53,8 +53,6 @@ Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları s
 
 ## 🔌 API Endpoint Listesi (RESTful)
 
-## 🔌 API Endpoint Listesi (RESTful)
-
 Projede kullanılan yönlendirmeler ve API servisleri aşağıda listelenmiştir:
 
 ### 📄 Sayfa Yönlendirmeleri (Views)
