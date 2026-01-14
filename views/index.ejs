@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="/gdz.png" alt="GDZ Elektrik Logo" onerror="this.style.display='none'">
+        </div>
+
+        <div class="menu-item active" onclick="showSection('dashboard', this)"><i class="fas fa-home"></i> Anasayfa</div>
+        
+        <div class="menu-item" onclick="showSection('bolgesel-goruntuleme', this); initMapOnce();"><i class="fas fa-map-marked-alt"></i> Bölgesel Görüntüleme</div>
+        
+        <div class="menu-item" onclick="showSection('tuketim-trendi', this)"><i class="fas fa-chart-line"></i> Tüketim Trendi</div>
+        <div class="menu-item" onclick="showSection('tuketim-tahmin', this)"><i class="fas fa-crystal-ball"></i> Tüketim Tahmini</div>
+        <div class="menu-item" onclick="showSection('kesinti-analiz', this)"><i class="fas fa-chart-pie"></i> Kesinti Nedenleri</div>
+
+        <a href="/logout" class="menu-item logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+        </a>
+    </div>
+
+    <div class="content">
+
+        <div id="dashboard" class="section active">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2><i class="fas fa-tachometer-alt"></i> Aylık Yönetici Paneli</h2>
+                <div style="background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 10px; align-items: center;">
+                    <label style="margin:0; font-weight: bold; color: #555;">Dönem:</label>
+                    <input type="month" id="kpiDate" value="2024-03" style="border: 1px solid #ccc; padding: 5px; border-radius: 4px;" onchange="updateDashboard()">
+                    <button onclick="updateDashboard()" style="padding: 5px 15px; font-size: 13px;">Getir</button>
+                </div>
+            </div>
+            
+            <div class="kpi-container">
+                <div class="kpi-card blue"><div class="kpi-icon"><i class="fas fa-bolt"></i></div><div class="kpi-info"><h4>Toplam Tüketim</h4><span id="kpiTuketim">...</span></div></div>
+                <div class="kpi-card orange"><div class="kpi-icon"><i class="fas fa-chart-line"></i></div><div class="kpi-info"><h4>Değişim (%)</h4><span id="kpiDegisim">...</span></div></div>
+                <div class="kpi-card green"><div class="kpi-icon"><i class="fas fa-crown"></i></div><div class="kpi-info"><h4>En Yüksek Tüketim</h4><span id="kpiSampiyon">...</span></div></div>
+                <div class="kpi-card red"><div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="kpi-info"><h4>Kesinti Sayısı</h4><span id="kpiKesinti">...</span></div></div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h2><i class="fas fa-city"></i> İlçe Tipine Göre Tüketim Dağılımı</h2>
+                        <div class="chart-container">
+                            <canvas id="chartTipDagilim"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2> EN YÜKSEK 8 İLÇE ANALİZİ (TÜKETİM & ARIZA) </h2>
+                
+                <div class="controls" style="margin-top: 0;">
+                    <div class="form-group"><label>Başlangıç:</label><input type="month" id="top8Start" value="2024-01"></div>
+                    <div class="form-group"><label>Bitiş:</label><input type="month" id="top8End" value="2024-12"></div>
+                    <button onclick="updateTop8Charts()">Listele</button>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="chart-container">
+                            <canvas id="chartTop8Tuketim"></canvas>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="chart-container">
+                            <canvas id="chartTop8Ariza"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div id="bolgesel-goruntuleme" class="section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2><i class="fas fa-map-marked-alt"></i> İzmir Bölgesel Analiz Haritası</h2>
+                    <div class="controls" style="margin:0; padding: 5px; background:none;">
+                        <div class="form-group">
+                            <label>Başlangıç:</label>
+                            <input type="month" id="mapStart" value="2024-01" onchange="updateSelectedCharts()">
+                        </div>
+                        <div class="form-group">
+                            <label>Bitiş:</label>
+                            <input type="month" id="mapEnd" value="2024-12" onchange="updateSelectedCharts()">
+                        </div>
+                        <div style="font-size: 13px; color: #7f8c8d; margin-left: 15px;">
+                            <i class="fas fa-info-circle"></i> Karşılaştırma için haritadan 2 ilçe seçin.
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="map"></div>
+
+                <div id="kdsKarsilastirmaPanel" class="kds-card" style="display: none; margin-bottom: 20px; animation: fadeIn 0.5s;">
+                    <div class="kds-score">
+                        <h1 id="kdsKarsilastirmaIcon" style="font-size: 50px;">⚖️</h1>
+                        <span id="kdsKarsilastirmaBadge" class="kds-badge">ANALİZ</span>
+                    </div>
+                    <div class="kds-content">
+                        <h5 id="kdsKarsilastirmaBaslik">BÖLGESEL KARŞILAŞTIRMA</h5>
+                        <p id="kdsKarsilastirmaMesaj">İki bölge arasındaki veriler analiz ediliyor...</p>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 5px; border-left: 3px solid #34495e;">
+                            <strong>💡 KDS YATIRIM TAVSİYESİ:</strong> <span id="kdsKarsilastirmaOneri">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chartsArea" style="display: none;">
+                    
+                    <h3 style="color: #3498db; margin: 20px 0 10px 0; font-size: 16px; border-bottom: 1px solid #ddd;">⚡ Aylık Tüketim Analizi</h3>
+                    <div class="chart-row">
+                        <div class="chart-col" id="colTuketim1" style="display: none;">
+                            <div class="chart-container"><canvas id="chartMapTuketim1"></canvas></div>
+                        </div>
+                        <div class="chart-col" id="colTuketim2" style="display: none;">
+                            <div class="chart-container"><canvas id="chartMapTuketim2"></canvas></div>
+                        </div>
+                    </div>
+
+                    <h3 style="color: #e74c3c; margin: 20px 0 10px 0; font-size: 16px; border-bottom: 1px solid #ddd;">⚠️ Aylık Arıza Analizi</h3>
+                    <div class="chart-row">
+                        <div class="chart-col" id="colAriza1" style="display: none;">
+                            <div class="chart-container"><canvas id="chartMapAriza1"></canvas></div>
+                        </div>
+                        <div class="chart-col" id="colAriza2" style="display: none;">
+                            <div class="chart-container"><canvas id="chartMapAriza2"></canvas></div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div id="emptyState" style="text-align: center; padding: 40px; color: #95a5a6;">
+                    <i class="fas fa-mouse-pointer" style="font-size: 40px; margin-bottom: 10px;"></i>
+                    <p>Verilerini görmek için haritadan bir veya iki ilçe seçiniz.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tuketim-trendi" class="section">
+            <div class="card">
+                <h2>Genel Tüketim Trendi</h2>
+                <div class="controls">
+                    <div class="form-group"><label>Başlangıç:</label><input type="month" id="trendStart" value="2024-01"></div>
+                    <div class="form-group"><label>Bitiş:</label><input type="month" id="trendEnd" value="2025-12"></div>
+                    <button onclick="getTrendData()">Analiz Et</button>
+                </div>
+                <div class="chart-container"><canvas id="chartTrend"></canvas></div>
+            </div>
+        </div>
+
+        <div id="tuketim-tahmin" class="section">
+            <div class="card">
+                <h2>2026 Tüketim Tahmini</h2>
+                <div class="controls">
+                    <div class="form-group">
+                        <label>İlçe:</label>
+                        <select id="tahminIlce">
+                            <% ilceler.forEach(ilce => { %> 
+                                <option value="<%= ilce.id %>"><%= ilce.ad %></option> 
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Çeyrek:</label>
+                        <select id="tahminCeyrek">
+                            <option value="all">Tüm Yıl</option>
+                            <option value="1">1. Çeyrek</option>
+                            <option value="2">2. Çeyrek</option>
+                            <option value="3">3. Çeyrek</option>
+                            <option value="4">4. Çeyrek</option>
+                        </select>
+                    </div>
+                    <button onclick="updateTahminChart()">Oluştur</button>
+                </div>
+                
+                <div class="chart-container"><canvas id="chartTahmin"></canvas></div>
+                
+                <div id="tahminAnalizKarti" class="kds-card" style="display: none;">
+                    <div class="kds-score">
+                        <h1 id="kdsOran">%0</h1>
+                        <span id="kdsBadge" class="kds-badge">...</span>
+                    </div>
+                    <div class="kds-content">
+                        <h5><i class="fas fa-robot"></i> GDZ Sistem Analizi ve Önerisi:</h5>
+                        <p id="kdsMesaj">Analiz yükleniyor...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="kesinti-analiz" class="section">
+            <div class="card">
+                <h2>Kesinti Nedenleri</h2>
+                <div class="controls"><div class="form-group"><label>İlçe:</label><select id="pieIlce" onchange="updatePieChart()"><% ilceler.forEach(ilce => { %> <option value="<%= ilce.id %>"><%= ilce.ad %></option> <% }) %></select></div></div>
+                <div class="chart-container" style="max-width: 600px; margin: 0 auto;"><canvas id="chartPie"></canvas></div>
+                
+                <div id="kesintiAnalizKarti" class="kds-card" style="display: none; margin-top: 30px;">
+                    <div class="kds-score">
+                        <div style="font-size: 40px;" id="kesintiIcon">⚠️</div>
+                    </div>
+                    <div class="kds-content">
+                        <h5 id="kesintiBaslik">ANALİZ YAPILIYOR...</h5>
+                        <p id="kesintiMesaj" style="font-size: 14px;">Veriler inceleniyor.</p>
+                        <div style="margin-top: 10px;">
+                            <span id="kesintiAction" class="badge bg-dark text-white">Aksiyon Önerisi</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Bu değişken dashboard.js dosyasında kullanılacak
+        const dbIlceler = <%- JSON.stringify(ilceler) %>;
+    </script>
+    
+    <script src="/js/dashboard.js"></script>
+
+</body>
+</html>
