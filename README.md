@@ -53,27 +53,39 @@ Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları s
 
 ## 🔌 API Endpoint Listesi (RESTful)
 
-| Metot | URL | Açıklama |
-// Sayfa Rotaları
-router.get('/', authKontrol, kdsController.getIndex);**authKontrol (Middleware) sayesinde önce giriş yapılıp yapılmadığına bakar.** 
-// Eğer giriş yapılmışsa kdsController.getIndex çalışır ve paneli açar.
-router.get('/login', kdsController.getLogin); **Kullanıcıya "Giriş Yap" formunun olduğu sayfayı (login.ejs) gösterir.**
-router.post('/login', kdsController.postLogin);**Şifreyi kontrol eder, doğruysa oturumu başlatır.**
-router.get('/logout', kdsController.getLogout); **Kullanıcının oturumunu (session) sonlandırır ve tekrar giriş sayfasına yönlendirir.**
+## 🔌 API Endpoint Listesi (RESTful)
 
-// API Rotaları
-router.get('/api/tuketim-trend', authKontrol, kdsController.getTuketimTrend);**Tüm ilçelerin 24 aylık veriler üzerinden elektrik tüketim trendi**
-router.get('/api/tuketim-bolgesel', authKontrol, kdsController.getBolgeselTuketim);**Harita üzerinden seçilen iki ilçenin tüketim verileri karşılaştırılması**
-router.get('/api/ariza-bolgesel', authKontrol, kdsController.getBolgeselAriza);**Harita üzerinden seçilen iki ilçenin arıza sayıları karşılaştırılması**
-router.get('/api/kesinti-nedenleri', authKontrol, kdsController.getKesintiNedenleri);**İlçelere göre kesinti nedenleri analizi**
-router.get('/api/tuketim-tahmin', authKontrol, kdsController.getTuketimTahmin);**Geçmiş tüketim verilerinden gelecek tüketim tahminlemesi**
-router.get('/api/kpi-metrics', authKontrol, kdsController.getKpiMetrics);
-router.get('/api/tuketim-tip-dagilim', authKontrol, kdsController.getTuketimTipDagilim);**Anasayfadaki kpi kartları**
-router.get('/api/top8-tuketim', authKontrol, kdsController.getTop8Tuketim); **En çok elektrik tüketimi yapan 8 ilçenin gösterilmesi (zamana göre filtresiyle)**
-router.get('/api/top8-ariza', authKontrol, kdsController.getTop8Ariza);
-router.get('/api/bolge-karsilastirma', authKontrol, kdsController.getBolgeKarsilastirma); **En çok arıza saysı olan 8 ilçenin gösterilmesi(zamana göre filtresiyle)**
-router.post('/api/ariza/ekle', kdsController.postArizaEkle);  **Bu ve altında eklediğim API bu ders kapsamında ekledim frontend bağlantısı eklemedim sadece backend tarafında yaptım**
-router.delete('/api/ariza/:id', kdsController.ArizaSil);
+Projede kullanılan yönlendirmeler ve API servisleri aşağıda listelenmiştir:
+
+### 📄 Sayfa Yönlendirmeleri (Views)
+| Metot | URL | Açıklama |
+| :--- | :--- | :--- |
+| **GET** | `/` | Yönetici Paneli (Dashboard) - *Auth (Giriş) kontrolü yapar* |
+| **GET** | `/login` | Giriş Yap sayfasını gösterir |
+| **POST** | `/login` | Giriş işlemini yapar (Şifre kontrolü ve Oturum açma) |
+| **GET** | `/logout` | Oturumu sonlandırır ve çıkış yapar |
+
+### 📊 Veri Servisleri (Analiz & Raporlama)
+| Metot | URL | Açıklama |
+| :--- | :--- | :--- |
+| **GET** | `/api/tuketim-trend` | Tüm ilçelerin 24 aylık elektrik tüketim trendi |
+| **GET** | `/api/tuketim-bolgesel` | Harita üzerinde seçilen iki ilçenin tüketim karşılaştırması |
+| **GET** | `/api/ariza-bolgesel` | Harita üzerinde seçilen iki ilçenin arıza sayıları |
+| **GET** | `/api/kesinti-nedenleri` | İlçelere göre kesinti nedenlerinin analizi |
+| **GET** | `/api/tuketim-tahmin` | Geçmiş verilerden gelecek tüketim tahmini (Regresyon) |
+| **GET** | `/api/kpi-metrics` | Anasayfa üstündeki özet bilgi kartları (KPI) |
+| **GET** | `/api/tuketim-tip-dagilim` | Tüketimin abone tiplerine dağılımı (Mesken, Sanayi vb.) |
+| **GET** | `/api/top8-tuketim` | En çok tüketim yapan 8 ilçenin listesi (Zaman filtreli) |
+| **GET** | `/api/top8-ariza` | En çok arıza sayısı olan 8 ilçenin listesi (Zaman filtreli) |
+| **GET** | `/api/bolge-karsilastirma` | İki bölge arasında detaylı Karar Destek karşılaştırması |
+
+### 🛠️ İşlem Servisleri (CRUD - Backend)
+*Bu endpoint'ler, ders kapsamındaki "CRUD ve İş Kuralı" isteklerini karşılamak için Backend tarafında geliştirilmiştir Frontend bağlantısı bulunmamaktadır.*
+
+| Metot | URL | Açıklama |
+| :--- | :--- | :--- |
+| **POST** | `/api/ariza/ekle` | Yeni arıza kaydı oluşturur  |
+| **DELETE** | `/api/ariza/:id` | ID'si verilen arıza kaydını siler |
 
 ## 📂 Proje Klasör Yapısı (MVC)
 * `routers/` - URL yönlendirmeleri
