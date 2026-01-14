@@ -1,4 +1,4 @@
-# ⚡ Gediz Elektrik - Altyapı Yatırımları Karar Destek Sistemi (KDS)
+# ⚡ Gediz Elektrik - Altyapı İçin Yatırımları Karar Destek Sistemi (KDS)
 
 Bu proje, **Sunucu Tabanlı Programlama** dersi kapsamında,  İzmir'in 30 ilçesinin  2024-2025 yıllarında aylara göre elektrik tüketim ve arıza  verilerini analiz ederek  altyapı ve yatırım planlamalarına veri odaklı karar desteği sağlamak amacıyla geliştirilmiştir.
 
